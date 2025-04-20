@@ -3,13 +3,17 @@
     x:Class="TalkyTiles.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:TalkyTiles"
+    xmlns:views="clr-namespace:TalkyTiles.Views"
     Shell.FlyoutBehavior="Disabled"
     Title="TalkyTiles">
 
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Route="MainPage" >
+        <Label Text="This is shell content!"
+               VerticalOptions="Center"
+               HorizontalOptions="Center" />
+    </ShellContent>
 
 </Shell>

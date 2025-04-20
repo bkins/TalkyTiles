@@ -1,4 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using TalkyTiles.Services;
+using TalkyTiles.Services.Interfaces;
+using TalkyTiles.ViewModels;
+using TalkyTiles.Views;
 
 namespace TalkyTiles
 {
@@ -15,6 +19,11 @@ namespace TalkyTiles
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddSingleton<IAudioService, AudioService>();
+            builder.Services.AddSingleton<StorageService>();
+
+            builder.Services.AddTransient<MainPageViewModel>();
+            builder.Services.AddTransient<MainPage>();
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
