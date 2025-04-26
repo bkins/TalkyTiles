@@ -1,0 +1,22 @@
+﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:TalkyTiles.MobileApp"
+             xmlns:converters1="clr-namespace:TalkyTiles.MobileApp.Utilities.Converters"
+             x:Class="TalkyTiles.MobileApp.App">
+
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <converters1:InverseBoolConverter         x:Key="InverseBoolConverter" />
+            <converters1:BoolToEditModeLabelConverter x:Key="BoolToEditModeLabelConverter" />
+
+            <ResourceDictionary.MergedDictionaries>
+
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

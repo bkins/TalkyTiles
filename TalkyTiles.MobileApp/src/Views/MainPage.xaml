@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:ui="clr-namespace:TalkyTiles.MobileApp.UI"
+
+    xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core"
+    x:Class="TalkyTiles.MobileApp.Views.MainPage"
+    x:DataType="viewModels:MainPageViewModel"
+    BackgroundColor="Coral">
+
+    <Grid>
+
+        <!-- Tile Layout -->
+        <ui:TileCanvasView ItemsSource="{Binding Buttons}" />
+
+        <!-- Bottom Controls: Edit Switch + Add Button -->
+        <StackLayout Orientation="Horizontal"
+                     HorizontalOptions="Start"
+                     VerticalOptions="End"
+                     Padding="20"
+                     Spacing="30">
+
+            <Label Text="Edit Mode"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   BackgroundColor="Transparent"/>
+
+            <Switch IsToggled="{Binding IsEditMode, Mode=TwoWay}" />
+
+            <!-- Add Button: Only visible in Edit Mode -->
+            <Button Text="➕"
+                    Command="{Binding AddNewTileCommand}"
+                    IsVisible="{Binding IsEditMode}"
+                    VerticalOptions="Center"
+                    BackgroundColor="LightGray"
+                    Padding="10,5" />
+        </StackLayout>
+
+    </Grid>
+</ContentPage>
