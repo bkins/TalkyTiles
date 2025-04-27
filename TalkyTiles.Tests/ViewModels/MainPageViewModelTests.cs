@@ -1,79 +1,152 @@
-﻿using Moq;
+﻿// Tests/ViewModels/MainPageViewModelTests.cs
+
+using Moq;
 using TalkyTiles.Core.Models;
-using TalkyTiles.Core.ViewModels;
 using TalkyTiles.Core.Services.Interfaces;
-using Xunit;
+using TalkyTiles.Core.ViewModels;
+using TalkyTiles.Tests.Infrastructure;
 
-namespace TalkyTiles.Tests.ViewModels;
-
-public class MainPageViewModelTests
+namespace TalkyTiles.Tests.ViewModels
 {
-    [Fact]
-    public void ToggleEditMode_ShouldFlipIsEditMode()
+    public class MainPageViewModelTests : ViewModelTestBase<MainPageViewModel>
     {
-        // Arrange
-        var mockAudioService   = new Mock<IAudioService>();
-        var mockStorageService = new Mock<ITileStorageService>();
-        var mockUiStateService = new Mock<IUiStateService>();
+        private const double Tolerance = .01;
 
-        bool isEditMode = false;
-        mockUiStateService.Setup(stateService => stateService.IsEditMode)
-                          .Returns(() => isEditMode);
+        [Fact]
+        public void ToggleEditMode_Should_Call_UiStateService()
+        {
+            // Act
+            Sut.ToggleEditMode();
 
-        mockUiStateService.Setup(stateService => stateService.ToggleEditMode())
-                          .Callback(() => isEditMode = ! isEditMode);
+            // Assert
+            Mocker.GetMock<IUiStateService>()
+                  .Verify(stateService => stateService.ToggleEditMode(), Times.Once);
+        }
 
-        var vm = new MainPageViewModel(mockAudioService.Object
-                                     , mockStorageService.Object
-                                     , mockUiStateService.Object);
+        [Fact]
+        public async Task InitializeAsync_Should_Load_Buttons_From_Storage()
+        {
+            // Arrange
+            var page = TestUtility.CreatePage("StoredPage", "A", "B");
+            TestUtility.SetupStorageToReturnPages(Mocker, page);
 
-        // Act
-        bool initial = vm.IsEditMode;
+            // Act
+            await Sut.InitializeAsync();
 
-        vm.ToggleEditModeCommand.Execute(null);
+            // Assert
+            // Assert.Same(page, Sut.CurrentPage);
+            Assert.Equal(2, Sut.Buttons.Count);
+            Assert.Equal("A", Sut.Buttons[0].DisplayText);
+            Assert.Equal("B", Sut.Buttons[1].DisplayText);
+        }
 
-        // Assert
-        Assert.NotEqual(initial
-                      , vm.IsEditMode);
-    }
+        [Fact]
+        public async Task InitializeAsync_Should_SeedData_When_NoPagesExist()
+        {
+            // Arrange
+            TestUtility.SetupStorageToReturnPages(Mocker); // empty
 
-    [Fact]
-    public async Task AddNewTileAsync_ShouldAddButtonAndSave()
-    {
-        // Arrange
-        var mockAudioService   = new Mock<IAudioService>();
-        var mockStorageService = new Mock<ITileStorageService>();
-        var mockUiStateService = new Mock<IUiStateService>();
+            // Act
+            await Sut.InitializeAsync();
 
-        mockUiStateService.Setup(stateService => stateService.IsEditMode)
-                          .Returns(false);
+            // Assert
+            // Storage.SavePageAsync should have been called once with the seeded page
+            Mocker.GetMock<ITileStorageService>()
+                  .Verify(storageService => storageService.SavePageAsync
+                                  (It.Is<SoundPage>(page => page.Name == "Page 1"))
+                        , Times.Once);
 
-        var vm = new MainPageViewModel(mockAudioService.Object
-                                     , mockStorageService.Object
-                                     , mockUiStateService.Object);
+            // Assert.NotNull(Sut.CurrentPage);
+            Assert.NotEmpty(Sut.Buttons);
+        }
 
-        var page = new SoundPage
-                   {
-                           Name = "Test Page"
-                         , Buttons = new List<SoundButton>()
-                   };
-        vm.GetType()
-          .GetProperty("CurrentPage")!
-          .SetValue(vm
-                  , page); // Dirty reflection to inject CurrentPage because it's private set.
+        [Fact]
+        public async Task AddNewTileAsync_Should_Add_Button_And_Save()
+        {
+            // Arrange
+            var page = TestUtility.CreatePage("TestPage");
+            TestUtility.SetupStorageToReturnPages(Mocker, page);
+            await Sut.InitializeAsync();
 
-        int initialButtonCount = vm.Buttons.Count;
+            // Act
+            await Sut.Canvas.AddNewTileAsync();
 
-        // Act
-        await vm.AddNewTileAsync();
+            // Assert
+            Assert.Single(page.Buttons);
+            Assert.Single(Sut.Buttons);
+            Assert.Equal("New", page.Buttons[0].Text);
 
-        // Assert
-        Assert.Equal(initialButtonCount + 1
-                   , vm.Buttons.Count);
+            Mocker.GetMock<ITileStorageService>()
+                  .Verify(x => x.SavePageAsync(It.Is<SoundPage>(soundPage => soundPage.Buttons.Count == 1
+                                                                          && soundPage.Buttons[0].Text == "New")),
+                  Times.Once);
+        }
 
-        Assert.Single(page.Buttons); // page should have 1 SoundButton now
+        [Fact]
+        public async Task SavePageAsync_Should_Sync_Buttons_And_Call_Save()
+        {
+            // Arrange
+            var page = TestUtility.CreatePage("SaveTest", "Existing");
+            TestUtility.SetupStorageToReturnPages(Mocker, page);
 
-        mockStorageService.Verify(storageService => storageService.SavePageAsync(It.Is<SoundPage>(p => p.Buttons.Count == 1))
-                                , Times.Once);
+            await Sut.InitializeAsync();
+
+            // simulate user moving/adding tiles
+            Sut.Buttons.Clear();
+            Sut.Buttons.Add(new SoundButtonViewModel(new SoundButton
+                                                     {
+                                                             Text = "Moved"
+                                                           , X    = 5
+                                                           , Y    = 7
+                                                     }
+                                                   , Mocker.GetMock<IAudioService>().Object
+                                                   , Mocker.GetMock<ITileStorageService>().Object
+                                                   , Mocker.GetMock<IUiStateService>().Object
+                            ));
+
+            // Act
+            await Sut.Canvas.SaveCanvasAsync();
+
+            // Assert
+            Mocker.GetMock<ITileStorageService>()
+                  .Verify(storageService => storageService.SavePageAsync
+                          (It.Is<SoundPage>(soundPage => soundPage.Buttons.Count == 1
+                                                      && soundPage.Buttons[0].Text == "Moved"
+                                                      && Math.Abs(soundPage.Buttons[0].X - 5) < Tolerance
+                                                      && Math.Abs(soundPage.Buttons[0].Y - 7) < Tolerance))
+                         , Times.Once);
+        }
+
+
+        [Fact]
+        public void Setting_IsEditMode_ToDifferentValue_CallsToggleOnce()
+        {
+            // Arrange
+            var uiMock = TestUtility.GetUiMock(Mocker);
+
+            // Act
+            Sut.IsEditMode = true; // false → true
+
+            // Assert
+            uiMock.Verify(x => x.ToggleEditMode()
+                        , Times.Once);
+            Assert.True(Sut.IsEditMode);
+        }
+
+        [Fact]
+        public void Setting_IsEditMode_ToSameValue_DoesNotCallToggle()
+        {
+            // Arrange
+            var uiMock = TestUtility.GetUiMock(Mocker);
+
+            // Act
+            Sut.IsEditMode = false; // writing same value
+            Sut.IsEditMode = false; // again
+
+            // Assert
+            uiMock.Verify(x => x.ToggleEditMode()
+                        , Times.Never);
+            Assert.False(Sut.IsEditMode);
+        }
     }
 }

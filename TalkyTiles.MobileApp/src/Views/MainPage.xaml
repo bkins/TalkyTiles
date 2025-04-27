@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:ui="clr-namespace:TalkyTiles.MobileApp.UI"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ui="clr-namespace:TalkyTiles.MobileApp.UI"
 
-    xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core"
-    x:Class="TalkyTiles.MobileApp.Views.MainPage"
-    x:DataType="viewModels:MainPageViewModel"
-    BackgroundColor="Coral">
+             xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core"
+             x:Class="TalkyTiles.MobileApp.Views.MainPage"
+             x:DataType="viewModels:MainPageViewModel"
+             BackgroundColor="Coral">
 
     <Grid>
 
         <!-- Tile Layout -->
-        <ui:TileCanvasView ItemsSource="{Binding Buttons}" />
+        <ui:TileCanvasView x:Name="CanvasView"
+                           ItemsSource="{Binding Canvas.Buttons}" />
 
         <!-- Bottom Controls: Edit Switch + Add Button -->
         <StackLayout Orientation="Horizontal"
@@ -31,11 +31,12 @@
 
             <!-- Add Button: Only visible in Edit Mode -->
             <Button Text="➕"
-                    Command="{Binding AddNewTileCommand}"
+                    Command="{Binding Canvas.AddNewTileCommand}"
                     IsVisible="{Binding IsEditMode}"
                     VerticalOptions="Center"
                     BackgroundColor="LightGray"
                     Padding="10,5" />
+
         </StackLayout>
 
     </Grid>

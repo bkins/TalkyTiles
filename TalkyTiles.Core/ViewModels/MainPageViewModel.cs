@@ -1,17 +1,18 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
-using TalkyTiles.Core.Models;
-using TalkyTiles.Core.Services.Interfaces;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TalkyTiles.Core.Models;
+using TalkyTiles.Core.Services.Interfaces;
 
 namespace TalkyTiles.Core.ViewModels;
 
 public partial class MainPageViewModel : ObservableObject
 {
-    public ObservableCollection<SoundButtonViewModel> Buttons { get; } = new();
-
-    public SoundPage? CurrentPage { get; private set; }
+    public ObservableCollection<SoundButtonViewModel> Buttons     { get; } = new();
+    //public SoundPage?                                 CurrentPage { get; private set; }
 
     private readonly ITileStorageService _storage;
     private readonly IAudioService       _audio;
@@ -23,72 +24,72 @@ public partial class MainPageViewModel : ObservableObject
         get => _uiState.IsEditMode;
         set
         {
-            // Only toggle if the user really flipped the switch
-            if (value != _uiState.IsEditMode)
-                _uiState.ToggleEditMode();
+            // only toggle if the UI really flipped the value
+            if (value == _uiState.IsEditMode)
+                return;
+
+            _uiState.ToggleEditMode();
+            OnPropertyChanged(nameof(IsEditMode));
         }
     }
 
+    public TileCanvasViewModel Canvas { get; }
+
     public MainPageViewModel (IAudioService       audio
                             , ITileStorageService storage
-                            , IUiStateService     uiState)
+                            , IUiStateService     uiState
+            , TileCanvasViewModel                 canvasVm)
     {
         _audio   = audio;
         _storage = storage;
         _uiState = uiState;
 
-        // Subscribe to UI state changes
-        _uiState.EditModeChanged += (_
-                                   , _) =>
-        {
-            OnPropertyChanged(nameof(IsEditMode));
-        };
+        Canvas   = canvasVm;
 
+        // React to UI state changes
+        _uiState.EditModeChanged += (_, _) => OnPropertyChanged(nameof(IsEditMode));
     }
 
     public async Task InitializeAsync()
     {
+        await Canvas.InitializeAsync();
 
-        // Load the first page (seed if necessary)
-        var pages = await _storage.LoadAllPagesAsync();
-        if (! pages.Any())
-            await SeedTestDataAsync();
-
-        var page = pages.FirstOrDefault() ?? await SeedTestDataAsync();
-        CurrentPage = page;
-
-        Buttons.Clear();
-        _log.AppendLine("Buttons on Load:");
-        foreach (var btn in page.Buttons)
-        {
-            Buttons.Add(new SoundButtonViewModel(btn
-                                               , _audio
-                                               , _storage
-                                               , _uiState));
-            _log.AppendLine($"  {btn.Text}: X={btn.X}, Y={btn.Y}");
-        }
+        // CurrentPage = await LoadOrSeedPageAsync();
+        // LoadButtonsFromPage();
     }
+
+    private async Task<SoundPage> LoadOrSeedPageAsync()
+    {
+        var pages = await _storage.LoadAllPagesAsync();
+        return pages.FirstOrDefault() ?? await SeedTestDataAsync();
+    }
+
+    // private void LoadButtonsFromPage()
+    // {
+    //     // No-op if there's nothing to show
+    //     if (CurrentPage?.Buttons is not { Count: > 0 })
+    //         return;
+    //
+    //     Buttons.Clear();
+    //     _log.AppendLine("Buttons on Load:");
+    //
+    //     foreach (var button in CurrentPage.Buttons)
+    //     {
+    //         Buttons.Add(new SoundButtonViewModel(button, _audio, _storage, _uiState));
+    //         _log.AppendLine($"  {button.Text}: X={button.X}, Y={button.Y}");
+    //     }
+    // }
 
     private async Task<SoundPage> SeedTestDataAsync()
     {
         var sample = new SoundPage { Name         = "Page 1" };
         sample.Buttons.Add(new SoundButton { Text = "Hello" });
         sample.Buttons.Add(new SoundButton { Text = "Goodbye" });
-        await _storage.SavePageAsync(sample);
 
+        await _storage.SavePageAsync(sample);
         return sample;
     }
 
-    [RelayCommand]
-    public async Task SavePageAsync()
-    {
-        if (CurrentPage == null) return;
-        // Sync VM -> model
-        CurrentPage.Buttons = Buttons.Select(vm => vm.ToModel()).ToList();
-        await _storage.SavePageAsync(CurrentPage);
-        _log.AppendLine("Page saved.");
-        Console.WriteLine(_log.ToString());
-    }
 
     [RelayCommand]
     public void ToggleEditMode()
@@ -97,15 +98,11 @@ public partial class MainPageViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task AddNewTileAsync()
-    {
-        if (CurrentPage == null) return;
-        var btn = new SoundButton { Text = "New", X = 50, Y = 50 };
-        CurrentPage.Buttons.Add(btn);
-        Buttons.Add(new SoundButtonViewModel(btn
-                                           , _audio
-                                           , _storage
-                                           , _uiState));
-        await _storage.SavePageAsync(CurrentPage);
-    }
+    public Task AddNewTileAsync()
+        => Canvas.AddNewTileAsync();
+
+    [RelayCommand]
+    public Task SavePageAsync()
+        => Canvas.SaveCanvasAsync();
+
 }

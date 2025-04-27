@@ -18,8 +18,6 @@ public partial class SoundButtonViewModel : ObservableObject
 
     private string? _pendingAudioPath;
 
-
-
     public string AudioPath
     {
         get => _model.AudioPath;
@@ -50,19 +48,6 @@ public partial class SoundButtonViewModel : ObservableObject
                          , value);
     }
 
-    public SoundButtonViewModel (SoundButton         model
-                               , IAudioService       audioService
-                               , ITileStorageService storage
-                               , IUiStateService     uiState)
-    {
-        _model        = model;
-        _audioService = audioService;
-        _storage      = storage;
-        _uiState      = uiState;
-
-        PlayAudioCommand = new AsyncRelayCommand(PlayAudioAsync);
-    }
-
     public string DisplayText => _model.Text;
 
     public double X
@@ -87,8 +72,20 @@ public partial class SoundButtonViewModel : ObservableObject
         }
     }
 
-
     public ICommand PlayAudioCommand { get; }
+
+    public SoundButtonViewModel (SoundButton         model
+                               , IAudioService       audioService
+                               , ITileStorageService storage
+                               , IUiStateService     uiState)
+    {
+        _model        = model;
+        _audioService = audioService;
+        _storage      = storage;
+        _uiState      = uiState;
+
+        PlayAudioCommand = new AsyncRelayCommand(PlayAudioAsync);
+    }
 
     private async Task PlayAudioAsync()
     {
@@ -154,14 +151,12 @@ public partial class SoundButtonViewModel : ObservableObject
             _model.AudioPath  = _pendingAudioPath ?? string.Empty;
             _pendingAudioPath = null;
 
-            // Persist
-            // if (Application.Current?.MainPage is  MainPage { BindingContext: MainPageViewModel { CurrentPage: { } page } mainPageViewModel })
-            // {
-            //     var
-            //     await mainPageViewModel.SavePageAsync();
-            // }
-
-            var mainPageViewModel = new MainPageViewModel(_audioService, _storage, _uiState);
+            var mainPageViewModel = new MainPageViewModel(_audioService
+                                                        , _storage
+                                                        , _uiState
+                                                        , new TileCanvasViewModel(_audioService
+                                                                                , _storage
+                                                                                , _uiState));
 
             await mainPageViewModel.SavePageAsync();
 
@@ -178,7 +173,7 @@ public partial class SoundButtonViewModel : ObservableObject
     {
         while (SecondsRemaining > 0)
         {
-            await Task.Delay(1000);
+            await Delay(1000);
             SecondsRemaining--;
 
             if (IsRecording.Not())
@@ -186,6 +181,11 @@ public partial class SoundButtonViewModel : ObservableObject
         }
 
         await StopRecordingAsync();
+    }
+
+    protected virtual Task Delay (int milliseconds)
+    {
+        return Task.Delay(milliseconds);
     }
 
     public SoundButton ToModel() => new()

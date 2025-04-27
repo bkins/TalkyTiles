@@ -24,6 +24,8 @@ namespace TalkyTiles.MobileApp
             builder.Services.AddSingleton<ITileStorageService, TileStorageService>();
             builder.Services.AddSingleton<IUiStateService, UiStateService>();
 
+            builder.Services.AddTransient<TileCanvasViewModel>();
+            builder.Services.AddTransient<MainPageViewModel>();
             builder.Services.AddTransient<MainPageViewModel>();
             builder.Services.AddTransient<MainPage>();
 #if DEBUG

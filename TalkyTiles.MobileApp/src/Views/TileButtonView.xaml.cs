@@ -74,7 +74,7 @@ public partial class TileButtonView : ContentView
                 vm.X = bounds.X;
                 vm.Y = bounds.Y;
 
-                _ = SavePosition(vm); // fire and forget
+                _ = SavePosition(); // fire and forget
 
                 break;
             }
@@ -82,7 +82,7 @@ public partial class TileButtonView : ContentView
     }
 
 
-    private static async Task SavePosition (SoundButtonViewModel vm)
+    private static async Task SavePosition ()
     {
         Console.WriteLine($"App.Current.MainPage: {Application.Current?.MainPage}");
         Console.WriteLine($"Type: {Application.Current?.MainPage?.GetType().Name}");
@@ -93,12 +93,12 @@ public partial class TileButtonView : ContentView
                     {
                             BindingContext: MainPageViewModel
                             {
-                                    CurrentPage: not null
-                            } mainVM
+
+                            } mainVm
                     }
             })
         {
-            await mainVM.SavePageAsync();
+            await mainVm.SavePageAsync();
         }
         else
         {
