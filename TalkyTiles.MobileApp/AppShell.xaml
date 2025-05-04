@@ -7,13 +7,21 @@
     Shell.FlyoutBehavior="Disabled"
     Title="TalkyTiles.MobileApp">
 
+    <!-- <ShellContent -->
+    <!--     Title="Home" -->
+    <!--     ContentTemplate="{DataTemplate views:MainPage}" -->
+    <!--     Route="MainPage" > -->
+    <!--     <Label Text="This is shell content!" -->
+    <!--            VerticalOptions="Center" -->
+    <!--            HorizontalOptions="Center" /> -->
+    <!-- </ShellContent> -->
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate views:MainPage}"
-        Route="MainPage" >
-        <Label Text="This is shell content!"
-               VerticalOptions="Center"
-               HorizontalOptions="Center" />
-    </ShellContent>
+        Route="MainPage" />
+    <ShellContent
+        Title="Edit Tile"
+        ContentTemplate="{DataTemplate views:EditTilePage}"
+        Route="EditTilePage" />
 
 </Shell>

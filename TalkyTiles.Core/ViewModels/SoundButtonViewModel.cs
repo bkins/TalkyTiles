@@ -30,14 +30,18 @@ public partial class SoundButtonViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRecord))]
     private bool _isRecording;
 
-    public bool IsRecording
-    {
-        get => _isRecording;
-        set => SetProperty(ref _isRecording
-                         , value);
-    }
+    //public bool IsRecording
+    // {
+    //     get => _isRecording;
+    //     set => SetProperty(ref _isRecording
+    //                      , value);
+    // }
+
+    public bool CanRecord => ! _isRecording && _uiState.IsEditMode;
 
     private int _secondsRemaining;
 
@@ -48,8 +52,17 @@ public partial class SoundButtonViewModel : ObservableObject
                          , value);
     }
 
-    public string DisplayText => _model.Text;
+    public string DisplayText
+    {
+        get => _model.Text;
+        set => _model.Text = value;
+    }
 
+    public string Id
+    {
+        get => _model.Id;
+        set => _model.Id = value;
+    }
     public double X
     {
         get => _model.X;
@@ -73,11 +86,24 @@ public partial class SoundButtonViewModel : ObservableObject
     }
 
     public ICommand PlayAudioCommand { get; }
+    public double   Width            { get; set; }
+    public double   Height           { get; set; }
+
+    /// <summary>
+    /// Mirrors the app’s global “Edit Mode” flag, so each tile can show/hide its delete button.
+    /// </summary>
+    public bool IsEditMode => _uiState.IsEditMode;
+    public string Color { get; set; }
+
+    public IAsyncRelayCommand RemoveCommand { get; }
+    public IAsyncRelayCommand EditCommand   { get; }
 
     public SoundButtonViewModel (SoundButton         model
                                , IAudioService       audioService
                                , ITileStorageService storage
-                               , IUiStateService     uiState)
+                               , IUiStateService     uiState
+                               , TileCanvasViewModel canvasVm
+                               , IAsyncRelayCommand  removeCommand)
     {
         _model        = model;
         _audioService = audioService;
@@ -85,6 +111,14 @@ public partial class SoundButtonViewModel : ObservableObject
         _uiState      = uiState;
 
         PlayAudioCommand = new AsyncRelayCommand(PlayAudioAsync);
+
+        _uiState.EditModeChanged += (_, _) => OnPropertyChanged(nameof(IsEditMode));
+        _uiState.EditModeChanged += (_, _) => OnPropertyChanged(nameof(CanRecord));
+
+        RemoveCommand = removeCommand;
+
+        //RemoveCommand = new AsyncRelayCommand(async () => await canvasVm.RemoveTileAsync(this));
+        EditCommand = new AsyncRelayCommand(async () => await canvasVm.EditTileAsync(this));
     }
 
     private async Task PlayAudioAsync()
@@ -166,6 +200,13 @@ public partial class SoundButtonViewModel : ObservableObject
         }
 
         IsRecording = false;
+    }
+
+    [RelayCommand]
+    public async Task RemoveMeAsync()
+    {
+        // remove itself from the canvas VM
+        //await _uiState.Canvas.RemoveTileAsync(this);
     }
 
 

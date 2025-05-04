@@ -35,6 +35,7 @@ public partial class TileButtonViewModel : ObservableObject
             OnPropertyChanged(nameof(Y));
         }
     }
+
     public TileButtonViewModel (TileButtonModel model
                               , AudioService    audioService)
     {

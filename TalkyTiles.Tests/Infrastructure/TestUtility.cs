@@ -48,32 +48,37 @@ public static class TestUtility
     public static SoundButtonViewModel CreateSut (SoundButton                   model
                                                 , out Mock<IAudioService>       audioMock
                                                 , out Mock<ITileStorageService> storageMock
-                                                , out Mock<IUiStateService>     uiStateMock)
+                                                , out Mock<IUiStateService>     uiStateMock
+                                                , out Mock<TileCanvasViewModel> canvasMock)
     {
         audioMock   = new Mock<IAudioService>();
         storageMock = new Mock<ITileStorageService>();
         uiStateMock = new Mock<IUiStateService>();
+        canvasMock  = new Mock<TileCanvasViewModel>();
 
         return new SoundButtonViewModel(model
                                       , audioMock.Object
                                       , storageMock.Object
                                       , uiStateMock.Object
-        );
+                                      , canvasMock.Object);
     }
 
     public static TestableSoundButtonViewModel CreateTestableSut (SoundButton                   model
                                                                 , out Mock<IAudioService>       audioMock
                                                                 , out Mock<ITileStorageService> storageMock
-                                                                , out Mock<IUiStateService>     uiMock)
+                                                                , out Mock<IUiStateService>     uiMock
+                                                                , out Mock<TileCanvasViewModel> canvasMock)
     {
         audioMock   = new Mock<IAudioService>();
         storageMock = new Mock<ITileStorageService>();
         uiMock      = new Mock<IUiStateService>();
+        canvasMock  = new Mock<TileCanvasViewModel>();
 
         return new TestableSoundButtonViewModel(model
                                               , audioMock.Object
                                               , storageMock.Object
-                                              , uiMock.Object);
+                                              , uiMock.Object
+                                              , canvasMock.Object);
     }
 }
 
@@ -81,15 +86,16 @@ public class TestableSoundButtonViewModel : SoundButtonViewModel
 {
     public List<int> RecordedSeconds { get; } = new();
 
-    public TestableSoundButtonViewModel (
-            SoundButton         model
-          , IAudioService       audio
-          , ITileStorageService storage
-          , IUiStateService     uiState)
+    public TestableSoundButtonViewModel (SoundButton         model
+                                       , IAudioService       audio
+                                       , ITileStorageService storage
+                                       , IUiStateService     uiState
+                                       , TileCanvasViewModel tileCanvasVm)
             : base(model
                  , audio
                  , storage
-                 , uiState)
+                 , uiState
+                 , tileCanvasVm)
     {
     }
 

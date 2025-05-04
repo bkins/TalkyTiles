@@ -19,13 +19,18 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { Text = "Hello", AudioPath = "file.wav" };
-            var sut = TestUtility.CreateSut(model, out var audioMock, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out var audioMock
+                                          , out _
+                                          , out _
+                                          , out _);
 
             // Act
             await ((IAsyncRelayCommand)sut.PlayAudioCommand).ExecuteAsync(null);
 
             // Assert
-            audioMock.Verify(x => x.PlayAudioAsync("file.wav"), Times.Once);
+            audioMock.Verify(x => x.PlayAudioAsync("file.wav")
+                           , Times.Once);
         }
 
         [Fact]
@@ -33,13 +38,18 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { Text = "Hello", AudioPath = string.Empty };
-            var sut = TestUtility.CreateSut(model, out var audioMock, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out var audioMock
+                                          , out _
+                                          , out _
+                                          , out _);
 
             // Act
             await ((IAsyncRelayCommand)sut.PlayAudioCommand).ExecuteAsync(null);
 
             // Assert
-            audioMock.Verify(x => x.PlayAudioAsync(It.IsAny<string>()), Times.Never);
+            audioMock.Verify(x => x.PlayAudioAsync(It.IsAny<string>())
+                           , Times.Never);
         }
 
         [Fact]
@@ -47,10 +57,15 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { X = 0 };
-            var sut = TestUtility.CreateSut(model, out _, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out _
+                                          , out _
+                                          , out _
+                                          , out _);
 
             bool raised = false;
-            sut.PropertyChanged += (s, e) =>
+            sut.PropertyChanged += (s
+                                  , e) =>
             {
                 if (e.PropertyName == nameof(sut.X))
                     raised = true;
@@ -60,7 +75,8 @@ namespace TalkyTiles.Tests.ViewModels
             sut.X = 42;
 
             // Assert
-            Assert.Equal(42, model.X);
+            Assert.Equal(42
+                       , model.X);
             Assert.True(raised);
         }
 
@@ -69,17 +85,23 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { X = 7 };
-            var sut = TestUtility.CreateSut(model, out _, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out _
+                                          , out _
+                                          , out _
+                                          , out _);
 
             int count = 0;
-            sut.PropertyChanged += (s, e) => count++;
+            sut.PropertyChanged += (s
+                                  , e) => count++;
 
             // Act
             sut.X = 7;
             sut.X = 7;
 
             // Assert
-            Assert.Equal(0, count);
+            Assert.Equal(0
+                       , count);
         }
 
         [Fact]
@@ -87,10 +109,15 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { Y = 5 };
-            var sut = TestUtility.CreateSut(model, out _, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out _
+                                          , out _
+                                          , out _
+                                          , out _);
 
             bool raised = false;
-            sut.PropertyChanged += (s, e) =>
+            sut.PropertyChanged += (s
+                                  , e) =>
             {
                 if (e.PropertyName == nameof(sut.Y))
                     raised = true;
@@ -100,7 +127,8 @@ namespace TalkyTiles.Tests.ViewModels
             sut.Y = 99;
 
             // Assert
-            Assert.Equal(99, model.Y);
+            Assert.Equal(99
+                       , model.Y);
             Assert.True(raised);
         }
 
@@ -109,17 +137,23 @@ namespace TalkyTiles.Tests.ViewModels
         {
             // Arrange
             var model = new SoundButton { Y = 13 };
-            var sut = TestUtility.CreateSut(model, out _, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out _
+                                          , out _
+                                          , out _
+                                          , out _);
 
             int count = 0;
-            sut.PropertyChanged += (s, e) => count++;
+            sut.PropertyChanged += (s
+                                  , e) => count++;
 
             // Act
             sut.Y = 13;
             sut.Y = 13;
 
             // Assert
-            Assert.Equal(0, count);
+            Assert.Equal(0
+                       , count);
         }
 
         [Fact]
@@ -128,22 +162,29 @@ namespace TalkyTiles.Tests.ViewModels
             // Arrange
             var id    = Guid.NewGuid().ToString();
             var model = new SoundButton { Id = id };
-            var sut   = TestUtility.CreateSut(model, out var audio, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out var audio
+                                          , out _
+                                          , out _
+                                          , out _);
 
             audio.Setup(x => x.StartRecordingAsync($"{id}.wav"))
                  .ReturnsAsync("recording.wav");
 
             // Pre-assert
             Assert.False(sut.IsRecording);
-            Assert.Equal(0, sut.SecondsRemaining);
+            Assert.Equal(0
+                       , sut.SecondsRemaining);
 
             // Act
             await sut.RecordAudioCommand.ExecuteAsync(null);
 
             // Assert
-            audio.Verify(x => x.StartRecordingAsync($"{id}.wav"), Times.Once);
+            audio.Verify(x => x.StartRecordingAsync($"{id}.wav")
+                       , Times.Once);
             Assert.True(sut.IsRecording);
-            Assert.Equal(10, sut.SecondsRemaining);
+            Assert.Equal(10
+                       , sut.SecondsRemaining);
         }
 
         [Fact]
@@ -152,7 +193,11 @@ namespace TalkyTiles.Tests.ViewModels
             // Arrange
             var id    = Guid.NewGuid().ToString();
             var model = new SoundButton { Id = id };
-            var sut   = TestUtility.CreateSut(model, out var audio, out _, out _);
+            var sut = TestUtility.CreateSut(model
+                                          , out var audio
+                                          , out _
+                                          , out _
+                                          , out _);
 
             audio.Setup(x => x.StartRecordingAsync($"{id}.wav"))
                  .ReturnsAsync("recording.wav");
@@ -169,11 +214,14 @@ namespace TalkyTiles.Tests.ViewModels
             await sut.StopRecordingCommand.ExecuteAsync(null);
 
             // Assert
-            audio.Verify(x => x.StopRecordingAsync(), Times.Once);
-            audio.Verify(x => x.PlayAudioAsync("recording.wav"), Times.Once);
+            audio.Verify(x => x.StopRecordingAsync()
+                       , Times.Once);
+            audio.Verify(x => x.PlayAudioAsync("recording.wav")
+                       , Times.Once);
 
             Assert.False(sut.IsRecording);
-            Assert.Equal("recording.wav", sut.AudioPath);
+            Assert.Equal("recording.wav"
+                       , sut.AudioPath);
         }
 
         [Fact]
@@ -185,7 +233,8 @@ namespace TalkyTiles.Tests.ViewModels
             var sut = TestUtility.CreateTestableSut(model
                                                   , out var audioMock
                                                   , out var storageMock
-                                                  , out var uiMock);
+                                                  , out var uiMock
+                                                  , out var tileCanvasMock);
 
             audioMock.Setup(x => x.StartRecordingAsync($"{id}.wav"))
                      .ReturnsAsync("recording.wav");
@@ -198,7 +247,8 @@ namespace TalkyTiles.Tests.ViewModels
             await (sut.RecordAudioCommand).ExecuteAsync(null);
 
             // Assert
-            Assert.Equal(0, sut.SecondsRemaining); // Should have counted down to 0
+            Assert.Equal(0
+                       , sut.SecondsRemaining); // Should have counted down to 0
             audioMock.Verify(x => x.StopRecordingAsync()
                            , Times.Once);
         }
@@ -214,7 +264,8 @@ namespace TalkyTiles.Tests.ViewModels
             var sut = TestUtility.CreateTestableSut(model
                                                   , out var audioMock
                                                   , out var storageMock
-                                                  , out var uiMock);
+                                                  , out var uiMock
+                                                  , out var tileCanvasMock);
 
             audioMock.Setup(x => x.StartRecordingAsync($"{id}.wav"))
                      .ReturnsAsync("recording.wav");
@@ -227,7 +278,8 @@ namespace TalkyTiles.Tests.ViewModels
             await sut.RecordAudioCommand.ExecuteAsync(null);
 
             // Assert: RecordedSeconds should be [10,9,8,...,1]
-            var expected = Enumerable.Range(1, 10).Reverse().ToList();
+            var expected = Enumerable.Range(1
+                                          , 10).Reverse().ToList();
             Assert.Equal(expected
                        , sut.RecordedSeconds);
 

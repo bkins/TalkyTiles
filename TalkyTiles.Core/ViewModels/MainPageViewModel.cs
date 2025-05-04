@@ -19,6 +19,11 @@ public partial class MainPageViewModel : ObservableObject
     private readonly IUiStateService     _uiState;
     private readonly StringBuilder       _log = new();
 
+    [ObservableProperty] private ObservableCollection<SoundPageInfo> _pages = new();
+
+// This will be bound to your Picker.
+    [ObservableProperty] private SoundPageInfo? _selectedPage;
+
     public bool IsEditMode
     {
         get => _uiState.IsEditMode;
@@ -35,6 +40,8 @@ public partial class MainPageViewModel : ObservableObject
 
     public TileCanvasViewModel Canvas { get; }
 
+    public record SoundPageInfo (string Id, string Name);
+
     public MainPageViewModel (IAudioService       audio
                             , ITileStorageService storage
                             , IUiStateService     uiState
@@ -50,12 +57,31 @@ public partial class MainPageViewModel : ObservableObject
         _uiState.EditModeChanged += (_, _) => OnPropertyChanged(nameof(IsEditMode));
     }
 
+    partial void OnSelectedPageChanged (SoundPageInfo? value)
+    {
+        if (value != null)
+            _ = Canvas.LoadPageAsync(value.Id);
+    }
+
     public async Task InitializeAsync()
     {
-        await Canvas.InitializeAsync();
+        // 1) Load (or seed) all pages
+        var all = await _storage.LoadAllPagesAsync();
+        if (! all.Any())
+        {
+            var seed = await SeedTestDataAsync();
+            all = new List<SoundPage> { seed };
+        }
 
-        // CurrentPage = await LoadOrSeedPageAsync();
-        // LoadButtonsFromPage();
+        Pages.Clear();
+        foreach (var p in all)
+            Pages.Add(new SoundPageInfo(p.Id
+                                      , p.Name));
+
+        // 2) Default to the first page
+        SelectedPage = Pages.First();
+        // await Canvas.InitializeAsync();
+
     }
 
     private async Task<SoundPage> LoadOrSeedPageAsync()
@@ -104,5 +130,39 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     public Task SavePageAsync()
         => Canvas.SaveCanvasAsync();
+
+    [RelayCommand]
+    public async Task CreateNewPageAsync()
+    {
+        var p = new SoundPage { Name = $"Page {Pages.Count + 1}" };
+        await _storage.SavePageAsync(p);
+        Pages.Add(new SoundPageInfo(p.Id
+                                  , p.Name));
+        SelectedPage = Pages.Last();
+    }
+
+    [RelayCommand]
+    public async Task DeleteCurrentPage()
+    {
+        if (SelectedPage == null) return;
+
+        // 1) delete JSON file
+        await _storage.DeletePageAsync(SelectedPage.Id);
+
+        // 2) remove from picker list
+        Pages.Remove(SelectedPage);
+
+        // 3) switch to next or seed a new one
+        if (Pages.Count == 0)
+        {
+            await CreateNewPageAsync();
+        }
+        else
+        {
+            SelectedPage = Pages.FirstOrDefault()
+                        ?? throw new InvalidOperationException("no pages left");
+        }
+
+    }
 
 }

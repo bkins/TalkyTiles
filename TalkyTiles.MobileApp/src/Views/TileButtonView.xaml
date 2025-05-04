@@ -1,74 +1,236 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentView
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core"
-    x:Class="TalkyTiles.MobileApp.Views.TileButtonView"
-    x:DataType="viewModels:SoundButtonViewModel"
-    BackgroundColor="Transparent"
-    WidthRequest="100"
-    HeightRequest="100">
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core"
+             x:Class="TalkyTiles.MobileApp.Views.TileButtonView"
+             x:DataType="viewModels:SoundButtonViewModel"
+             x:Name="Root"
+             WidthRequest="100"
+             HeightRequest="100">
 
-    <Frame
-        WidthRequest="100"
-        HeightRequest="100"
-        BackgroundColor="LightCoral"
-        HasShadow="True"
-        CornerRadius="20">
+    <Frame Padding="0"
+           HasShadow="True"
+           CornerRadius="20"
+           BackgroundColor="LightCoral"
+           WidthRequest="85"
+           HeightRequest="85">
 
-        <Frame.GestureRecognizers>
-            <TapGestureRecognizer Command="{Binding PlayAudioCommand}" />
-            <PanGestureRecognizer PanUpdated="OnPanUpdated" />
-        </Frame.GestureRecognizers>
+        <Grid RowSpacing="2" ColumnSpacing="2">
 
-        <VerticalStackLayout>
-            <Label Text="{Binding DisplayText}"
+            <!-- 3 Columns / 3 Rows -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- EDIT button top-left -->
+            <Button Grid.Row="0"
+                    Grid.Column="0"
+                    Text="⚙"
+                    FontSize="16"
+                    TextColor="White"
+                    BackgroundColor="#444"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    Padding="0"
+                    CornerRadius="15"
+                    Command="{Binding EditCommand}"
+                    IsVisible="{Binding IsEditMode}"
+                    Grid.ZIndex="10" />
+
+            <!-- DELETE button top-right -->
+            <Button Grid.Row="0"
+                    Grid.Column="2"
+                    Text="×"
+                    FontSize="20"
+                    TextColor="White"
+                    BackgroundColor="Red"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    Padding="0"
+                    CornerRadius="15"
+                    Command="{Binding RemoveCommand}"
+                    CommandParameter="{Binding .}"
+                    IsVisible="{Binding IsEditMode}"
+                    Grid.ZIndex="10" />
+
+            <!-- TITLE in middle row, spanning all columns -->
+            <Label Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="3"
+                   Text="{Binding DisplayText}"
+                   FontSize="14"
                    TextColor="White"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center"
                    HorizontalOptions="Center"
-                   VerticalOptions="Center" />
+                   VerticalOptions="Center"
+                   InputTransparent="True" />
 
-            <Button Text="🎙️ Record"
-                    FontSize="12"
-                    Command="{Binding RecordAudioCommand}"
-                    IsVisible="{Binding IsRecording, Converter={StaticResource InverseBoolConverter}}" />
+            <!-- REC / STOP in bottom-center -->
+            <Grid Grid.Row="2"
+                  Grid.Column="1"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
 
-            <StackLayout IsVisible="{Binding IsRecording}"
-                         Orientation="Horizontal"
-                         Spacing="10"
-                         HorizontalOptions="Center">
-                <Label Text="{Binding SecondsRemaining}" TextColor="White" />
-                <Button Text="🛑 Stop"
-                        Command="{Binding StopRecordingCommand}"
-                        FontSize="12" />
-            </StackLayout>
-        </VerticalStackLayout>
+                <!-- REC button -->
+                <Button Grid.Row="0"
+                        Text="🛑 REC"
+                        FontSize="12"
+                        BackgroundColor="Transparent"
+                        Padding="0"
 
+                        Command="{Binding RecordAudioCommand}"
+                        IsVisible="{Binding CanRecord}" />
+
+                <!-- STOP layout -->
+                <StackLayout Grid.Row="0"
+                             Orientation="Horizontal"
+                             Spacing="6"
+                             HorizontalOptions="Center"
+                             IsVisible="{Binding IsRecording}">
+                    <Grid>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Text="🟥"
+                                FontSize="12"
+                                BackgroundColor="Transparent"
+                                Padding="0"
+                                Command="{Binding StopRecordingCommand}"
+                                HorizontalOptions="Start" />
+
+                        <Label Grid.Column="0"
+                               Text="{Binding SecondsRemaining}"
+                               TextColor="White"
+                               HorizontalOptions="Start"
+                               VerticalOptions="Center"/>
+                    </Grid>
+
+
+                </StackLayout>
+            </Grid>
+
+        </Grid>
     </Frame>
-    <!-- <ContentView.GestureRecognizers> -->
-    <!--     <PanGestureRecognizer PanUpdated="OnPanUpdated" /> -->
-    <!-- </ContentView.GestureRecognizers> -->
 </ContentView>
-<!-- <ContentView -->
-<!--     xmlns="http://schemas.microsoft.com/dotnet/2021/maui" -->
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?> -->
+<!-- -->
+<!-- <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui" -->
 <!--     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" -->
-<!--     xmlns:viewModels="clr-namespace:TalkyTiles.ViewModels" -->
-<!--     xmlns:local="clr-namespace:TalkyTiles.Views" -->
-<!--     x:Class="TalkyTiles.Views.TileButtonView" -->
-<!--     x:Name="Root" -->
+<!--     xmlns:viewModels="clr-namespace:TalkyTiles.Core.ViewModels;assembly=TalkyTiles.Core" -->
+<!--     x:Class="TalkyTiles.MobileApp.Views.TileButtonView" -->
 <!--     x:DataType="viewModels:SoundButtonViewModel" -->
-<!--     BackgroundColor="Transparent"> -->
-<!-- -->
-<!--     <Button -->
-<!--         Text="{Binding DisplayText}" -->
-<!--         Command="{Binding PlayAudioCommand}" -->
-<!--         BackgroundColor="LightBlue" -->
-<!--         TextColor="Black" -->
-<!--         WidthRequest="100" -->
-<!--         HeightRequest="100" -->
-<!--         CornerRadius="20" /> -->
-<!--     <ContentView.GestureRecognizers> -->
-<!--         <PanGestureRecognizer PanUpdated="OnPanUpdated" /> -->
-<!--     </ContentView.GestureRecognizers> -->
-<!-- -->
+<!--     x:Name="Root" -->
+<!--     WidthRequest="100" -->
+<!--     HeightRequest="100"> -->
+<!--      -->
+<!--     <Frame -->
+<!--         Padding="0" -->
+<!--         HasShadow="True" -->
+<!--         CornerRadius="20" -->
+<!--         BackgroundColor="LightCoral" -->
+<!--         WidthRequest="85" -->
+<!--         HeightRequest="85"> -->
+<!--      -->
+<!--         <Grid> -->
+<!--      -->
+<!--             ~1~ ════════════ Layer 0: Centered Title ════════════ @1@ -->
+<!--             ~1~ ~2~ Your Main Tile Content @2@ @1@ -->
+<!--             ~1~ <VerticalStackLayout HorizontalOptions="Fill" @1@ -->
+<!--             ~1~                      VerticalOptions="Fill" @1@ -->
+<!--             ~1~                      Padding="8" @1@ -->
+<!--             ~1~                      Spacing="6"> @1@ -->
+<!--      -->
+<!--                 <Label Text="{Binding DisplayText}" -->
+<!--                        FontSize="14" -->
+<!--                        TextColor="White" -->
+<!--                        LineBreakMode="TailTruncation" -->
+<!--                        HorizontalOptions="Center" -->
+<!--                        VerticalOptions="Center" -->
+<!--                        HorizontalTextAlignment="Center" -->
+<!--                        VerticalTextAlignment="Center" -->
+<!--                        InputTransparent="True" /> -->
+<!--      -->
+<!--                 <Button Text="🛑 REC" -->
+<!--                         FontSize="12" -->
+<!--                         BackgroundColor="Transparent" -->
+<!--                         Command="{Binding RecordAudioCommand}" -->
+<!--                         IsVisible="{Binding CanRecord}" /> -->
+<!--                         ~1~ IsVisible="{Binding IsRecording, Converter={StaticResource InverseBoolConverter}}" /> @1@ -->
+<!--             ~1~ ════════════ Layer 1: All the overlays ════════════ @1@ -->
+<!--             <AbsoluteLayout> -->
+<!--      -->
+<!--                 ~1~ Record / countdown UI @1@ -->
+<!--                 <VerticalStackLayout -->
+<!--                     AbsoluteLayout.LayoutBounds="0,0,1,1" -->
+<!--                     AbsoluteLayout.LayoutFlags="All" -->
+<!--                     Padding="8" -->
+<!--                     Spacing="6"> -->
+<!--      -->
+<!--                 ~1~ <StackLayout IsVisible="{Binding IsRecording}" @1@ -->
+<!--                 ~1~              Orientation="Horizontal" @1@ -->
+<!--                 ~1~              Spacing="10" @1@ -->
+<!--                 ~1~              HorizontalOptions="Center"> @1@ -->
+<!--                 ~1~      @1@ -->
+<!--      -->
+<!--                     <Label Text="{Binding SecondsRemaining}" TextColor="White" /> -->
+<!--                     <Button Text="🟥 Stop" -->
+<!--                             Command="{Binding StopRecordingCommand}" -->
+<!--                             FontSize="12" -->
+<!--                             BackgroundColor="Transparent" /> -->
+<!--                 ~1~ </StackLayout> @1@ -->
+<!--                 </VerticalStackLayout> -->
+<!--                 ~1~ </StackLayout> @1@ -->
+<!--      -->
+<!--             ~1~ </VerticalStackLayout> @1@ -->
+<!--      -->
+<!--             ~1~ DELETE Button (Top-Right) @1@ -->
+<!--             <Button -->
+<!--                 Text="×" -->
+<!--                 FontSize="14" -->
+<!--                 TextColor="White" -->
+<!--                 BackgroundColor="Red" -->
+<!--                 Padding="0" -->
+<!--                 HeightRequest="22" -->
+<!--                 WidthRequest="22" -->
+<!--                 HorizontalOptions="End" -->
+<!--                 VerticalOptions="Start" -->
+<!--                 Command="{Binding Source={x:Reference Root}, Path=RemoveTileCommand}" -->
+<!--                 CommandParameter="{Binding .}" -->
+<!--                 IsVisible="{Binding IsEditMode}" -->
+<!--                 Margin="2" /> -->
+<!--      -->
+<!--             ~1~ EDIT Button (Bottom-Right) @1@ -->
+<!--             <Button -->
+<!--                 Text="⚙" -->
+<!--                 FontSize="14" -->
+<!--                 TextColor="White" -->
+<!--                 BackgroundColor="#444" -->
+<!--                 Padding="0" -->
+<!--                 HeightRequest="22" -->
+<!--                 WidthRequest="22" -->
+<!--                 HorizontalOptions="Start" -->
+<!--                 VerticalOptions="Start" -->
+<!--                 Command="{Binding Source={x:Reference Root}, Path=EditTileCommand}" -->
+<!--                 CommandParameter="{Binding .}" -->
+<!--                 IsVisible="{Binding IsEditMode}" -->
+<!--                 Margin="2" /> -->
+<!--      -->
+<!--             </AbsoluteLayout> -->
+<!--         </Grid> -->
+<!--     </Frame> -->
 <!-- </ContentView> -->

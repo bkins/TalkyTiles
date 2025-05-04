@@ -11,10 +11,11 @@ namespace TalkyTiles.MobileApp
             InitializeComponent();
             Services = serviceProvider;
 
-            //MainPage = new AppShell();
+            //
             //MainPage = new MainPage();
 
-            MainPage = new NavigationPage(new MainPage());
+            //MainPage = new NavigationPage(new MainPage());
+            MainPage = new AppShell();
         }
     }
 }

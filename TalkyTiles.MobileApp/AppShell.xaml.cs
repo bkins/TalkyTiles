@@ -8,6 +8,7 @@ namespace TalkyTiles.MobileApp
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
+            Routing.RegisterRoute(nameof(EditTilePage), typeof(EditTilePage));
         }
     }
 }

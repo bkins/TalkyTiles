@@ -5,8 +5,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="TalkyTiles.MobileApp.UI.TileCanvasView">
 
-    <AbsoluteLayout x:Name="Canvas"
-                    BackgroundColor="Transparent"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="Fill" />
+    <!--
+    We only need one AbsoluteLayout named "CanvasLayout".  We won't
+    use BindingContext inside here any more.
+  -->
+    <AbsoluteLayout x:Name="CanvasLayout"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand" />
+
 </ContentView>

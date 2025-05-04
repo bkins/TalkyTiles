@@ -20,14 +20,16 @@ namespace TalkyTiles.MobileApp
                 });
 
             builder.Services.AddSingleton<IAudioService, AudioService>();
-            builder.Services.AddSingleton<StorageService>();
             builder.Services.AddSingleton<ITileStorageService, TileStorageService>();
             builder.Services.AddSingleton<IUiStateService, UiStateService>();
+            builder.Services.AddSingleton<StorageService>();
 
-            builder.Services.AddTransient<TileCanvasViewModel>();
-            builder.Services.AddTransient<MainPageViewModel>();
-            builder.Services.AddTransient<MainPageViewModel>();
-            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddSingleton<MainPageViewModel>();
+            builder.Services.AddSingleton<TileCanvasViewModel>();
+
+            builder.Services.AddSingleton<EditTileViewModel>();
+            builder.Services.AddSingleton<SoundButtonViewModel>();
+            builder.Services.AddSingleton<TileButtonViewModel>();
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif

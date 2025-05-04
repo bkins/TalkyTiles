@@ -102,7 +102,7 @@ namespace TalkyTiles.Tests.ViewModels
                                                    , Mocker.GetMock<IAudioService>().Object
                                                    , Mocker.GetMock<ITileStorageService>().Object
                                                    , Mocker.GetMock<IUiStateService>().Object
-                            ));
+                                                   , Mocker.GetMock<TileCanvasViewModel>().Object));
 
             // Act
             await Sut.Canvas.SaveCanvasAsync();
